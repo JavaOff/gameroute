@@ -17,3 +17,4 @@ Thumbs.db
 # Local secrets (should never exist in-repo, but just in case)
 *.pfx
 *.p12
+.claude/
