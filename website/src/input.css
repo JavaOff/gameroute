@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-950 text-zinc-200 antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    @apply bg-accent/30 text-white;
+  }
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-accent;
+  }
+}
+
+@layer components {
+  /* Glassmorphism card, the base surface used everywhere */
+  .glass {
+    @apply relative rounded-2xl border border-white/[0.06] bg-white/[0.03] shadow-glass backdrop-blur-xl;
+  }
+
+  .glass-hover {
+    @apply transition-all duration-300 ease-out-expo hover:-translate-y-1 hover:border-accent/30 hover:shadow-glow;
+  }
+
+  /* Primary neon CTA button */
+  .btn-neon {
+    @apply relative inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-accent-bright to-accent px-6 py-3.5 font-semibold text-white shadow-glow transition-all duration-300 ease-out-expo hover:shadow-glow-lg hover:brightness-110 active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-6 py-3.5 font-semibold text-zinc-100 transition-all duration-300 ease-out-expo hover:border-white/20 hover:bg-white/[0.08];
+  }
+
+  .nav-link {
+    @apply text-sm font-medium text-zinc-400 transition-colors duration-200 hover:text-white;
+  }
+
+  .section-eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/[0.07] px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-accent-bright;
+  }
+
+  .section-title {
+    @apply text-4xl font-bold tracking-tight text-white sm:text-5xl;
+  }
+
+  .section-subtitle {
+    @apply mx-auto mt-4 max-w-2xl text-balance text-lg text-zinc-400;
+  }
+
+  /* Scroll-reveal target: JS toggles .is-visible when it enters the viewport */
+  .reveal {
+    @apply translate-y-6 opacity-0 transition-all duration-700 ease-out-expo;
+  }
+  .reveal.is-visible {
+    @apply translate-y-0 opacity-100;
+  }
+
+  .feature-icon {
+    @apply flex h-12 w-12 items-center justify-center rounded-xl border border-accent/20 bg-accent/10 text-accent-bright;
+  }
+
+  .stat-pill {
+    @apply glass flex flex-col gap-1 p-4;
+  }
+
+  .code-chip {
+    @apply rounded-md border border-white/10 bg-black/40 px-1.5 py-0.5 font-mono text-[0.8em] text-accent-bright;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .bg-grid {
+    background-image: theme("backgroundImage.grid-pattern");
+    background-size: theme("backgroundSize.grid");
+  }
+  .mask-fade-bottom {
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
+}

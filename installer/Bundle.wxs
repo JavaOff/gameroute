@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GameRoute's Burn bootstrapper: wraps GameRoute.msi into a single
+  GameRouteSetup.exe. This is what actually gives GameRoute a real
+  installer .exe (an MSI alone is not one) with its own icon, version
+  resource, and elevation prompt.
+
+  UpgradeCode here is the BUNDLE's upgrade code: intentionally a
+  DIFFERENT, separately-stable GUID from Product.wxs's <Product UpgradeCode>
+  (bundles and MSI packages are tracked independently by Windows Installer).
+  Must also never change between releases.
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension">
+
+  <Bundle Name="GameRoute"
+          Version="$(var.ProductVersion)"
+          Manufacturer="GameRoute"
+          UpgradeCode="E958EE45-748B-46AD-924C-788D2D90F456"
+          IconSourceFile="$(var.IconFile)"
+          AboutUrl="https://github.com/">
+
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense">
+      <bal:WixStandardBootstrapperApplication
+          LicenseFile="$(var.LicenseFile)"
+          ShowVersion="yes"
+          SuppressOptionsUI="yes"
+          SuppressRepair="yes" />
+    </BootstrapperApplicationRef>
+
+    <Chain>
+      <MsiPackage Id="GameRouteMsi"
+                  SourceFile="$(var.ProductMsi)"
+                  DisplayName="GameRoute"
+                  Vital="yes"
+                  Visible="yes" />
+    </Chain>
+  </Bundle>
+</Wix>

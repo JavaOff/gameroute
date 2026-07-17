@@ -1,0 +1,21 @@
+{
+  "name": "GameRoute",
+  "short_name": "GameRoute",
+  "description": "Network companion for League of Legends: ping monitoring, traceroute analysis and safe, local Windows optimizations.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0c",
+  "theme_color": "#0a0a0c",
+  "icons": [
+    {
+      "src": "assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "gameroute-website",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Marketing/landing site for GameRoute.",
+  "scripts": {
+    "build": "tailwindcss -i ./src/input.css -o ./dist/styles.css --minify",
+    "watch": "tailwindcss -i ./src/input.css -o ./dist/styles.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.13",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47"
+  }
+}

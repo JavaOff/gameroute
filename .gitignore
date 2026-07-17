@@ -1,0 +1,19 @@
+# Maven build output
+target/
+dependency-reduced-pom.xml
+
+# Website build tooling
+website/node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Local secrets (should never exist in-repo, but just in case)
+*.pfx
+*.p12

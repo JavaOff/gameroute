@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  GameRoute MSI definition.
+
+  Built as x64 only (candle -arch x64) because jpackage bundles a 64-bit
+  JRE -that's also why INSTALLFOLDER hangs off ProgramFiles64Folder
+  rather than ProgramFilesFolder (which resolves to "Program Files (x86)"
+  regardless of package architecture in WiX v3; only ProgramFiles64Folder
+  lands in the real "C:\Program Files").
+
+  UpgradeCode below MUST stay the same for every future GameRoute release:
+  it's how Windows Installer recognizes "this is a newer version of the same
+  product" and performs an in-place upgrade instead of a side-by-side
+  install. ProductCode is Id="*" (a fresh GUID per build), which is the
+  normal/expected pattern alongside MajorUpgrade.
+-->
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*"
+           Name="GameRoute"
+           Language="1033"
+           Version="$(var.ProductVersion)"
+           Manufacturer="GameRoute"
+           UpgradeCode="54E8678D-60CD-4644-80E1-176C54D52A9C">
+
+    <Package InstallerVersion="500"
+             Compressed="yes"
+             InstallScope="perMachine"
+             Platform="x64"
+             Description="GameRoute $(var.ProductVersion) Setup"
+             Comments="Network companion for League of Legends"
+             Manufacturer="GameRoute" />
+
+    <MajorUpgrade
+        DowngradeErrorMessage="A newer version of GameRoute is already installed. Uninstall it first if you need to downgrade." />
+
+    <MediaTemplate EmbedCab="yes" />
+
+    <!-- Add/Remove Programs ("Apps & Features") metadata -->
+    <Icon Id="GameRouteIcon.ico" SourceFile="$(var.IconFile)" />
+    <Property Id="ARPPRODUCTICON" Value="GameRouteIcon.ico" />
+    <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
+    <Property Id="ARPCOMMENTS" Value="Network companion for League of Legends. Unofficial, not affiliated with Riot Games." />
+    <Property Id="ARPCONTACT" Value="GameRoute" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/" />
+
+    <!-- Custom "Uninstall.exe" registered as the ARP uninstall command too, so
+         Apps & Features and the local Uninstall.exe do exactly the same thing. -->
+    <Property Id="ARPSYSTEMCOMPONENT" Value="0" />
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFiles64Folder">
+        <Directory Id="INSTALLFOLDER" Name="GameRoute" />
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="GameRoute" />
+      </Directory>
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+
+    <!-- The standalone Uninstall.exe stub, built from installer\Uninstall.cs -->
+    <DirectoryRef Id="INSTALLFOLDER">
+      <Component Id="UninstallExe" Guid="7B0F5C7E-6A3A-4B62-9C2E-2A6E6B4B9A11" Win64="yes">
+        <File Id="UninstallExeFile" Name="Uninstall.exe" Source="$(var.UninstallExeFile)" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Start Menu shortcuts (app + uninstall) -->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcuts" Guid="3A9F5A6C-4B3A-4E7B-8F1E-9C6A1E2D5B44" Win64="yes">
+        <Shortcut Id="StartMenuShortcut"
+                  Name="GameRoute"
+                  Description="Network companion for League of Legends"
+                  Target="[INSTALLFOLDER]GameRoute.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="GameRouteIcon.ico" />
+        <Shortcut Id="StartMenuUninstallShortcut"
+                  Name="Uninstall GameRoute"
+                  Description="Uninstall GameRoute"
+                  Target="[INSTALLFOLDER]Uninstall.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="GameRouteIcon.ico" />
+        <RemoveFolder Id="RemoveApplicationProgramsFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\GameRoute" Name="StartMenuShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <!-- Desktop shortcut is its own Feature so it can be unchecked in the installer UI -->
+    <DirectoryRef Id="DesktopFolder">
+      <Component Id="DesktopShortcut" Guid="C4D2E9F1-1A2B-4C3D-9E8F-6B7A5C4D3E21" Win64="yes">
+        <Shortcut Id="DesktopShortcutLnk"
+                  Name="GameRoute"
+                  Description="Network companion for League of Legends"
+                  Target="[INSTALLFOLDER]GameRoute.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="GameRouteIcon.ico" />
+        <RegistryValue Root="HKCU" Key="Software\GameRoute" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+
+    <Feature Id="MainApplication" Title="GameRoute" Level="1" AllowAdvertise="no" Absent="disallow" TypicalDefault="install">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="UninstallExe" />
+      <ComponentRef Id="ApplicationShortcuts" />
+    </Feature>
+
+    <Feature Id="DesktopShortcutFeature" Title="Desktop Shortcut" Level="1" AllowAdvertise="no" TypicalDefault="install">
+      <ComponentRef Id="DesktopShortcut" />
+    </Feature>
+
+    <!-- Simple wizard: Welcome -> License -> feature checkboxes (desktop shortcut) -> Progress -> Finish -->
+    <UIRef Id="WixUI_FeatureTree" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseFile)" />
+    <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch GameRoute" />
+    <!-- $(var.GameRouteExeFileId) is extracted from the freshly-harvested AppFiles.wxs
+         at build time (see packaging\build-installer.ps1) rather than hardcoded, so it
+         can never silently go stale if the harvest ever changes. -->
+    <Property Id="WixShellExecTarget" Value="[#$(var.GameRouteExeFileId)]" />
+    <CustomAction Id="LaunchGameRoute" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes" />
+
+    <UI>
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchGameRoute">
+        WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT and NOT Installed
+      </Publish>
+    </UI>
+  </Product>
+</Wix>
