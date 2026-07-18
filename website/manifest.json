@@ -1,7 +1,7 @@
 {
   "name": "GameRoute",
   "short_name": "GameRoute",
-  "description": "Network companion for League of Legends: ping monitoring, traceroute analysis and safe, local Windows optimizations.",
+  "description": "Network and performance companion for 18 PC games: ping monitoring, FPS boost, traceroute analysis and safe, local Windows optimizations.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0c",
