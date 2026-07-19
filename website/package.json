@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Marketing/landing site for GameRoute.",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "tailwindcss -i ./src/input.css -o ./dist/styles.css --minify",
     "watch": "tailwindcss -i ./src/input.css -o ./dist/styles.css --watch"

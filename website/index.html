@@ -201,7 +201,7 @@
     </div>
     <div>
       <p class="counter text-3xl font-black text-white sm:text-4xl" data-target="0" data-suffix="">0</p>
-      <p class="mt-1 text-xs uppercase tracking-wider text-zinc-500">Telemetry Events Sent</p>
+      <p class="mt-1 text-xs uppercase tracking-wider text-zinc-500">Telemetry Sent Without Consent</p>
     </div>
     <div>
       <p class="counter text-3xl font-black text-white sm:text-4xl" data-target="16" data-suffix="+">0</p>
@@ -764,8 +764,8 @@
     <div class="glass reveal grid gap-10 !rounded-3xl p-10 sm:p-14 lg:grid-cols-[1fr_1.2fr] lg:items-center">
       <div>
         <span class="section-eyebrow">Privacy</span>
-        <h2 class="mt-5 text-3xl font-bold text-white sm:text-4xl">Your data never leaves your PC</h2>
-        <p class="mt-4 text-zinc-400">GameRoute was built by someone who was tired of "optimization" tools that quietly phone home. So this one doesn't.</p>
+        <h2 class="mt-5 text-3xl font-bold text-white sm:text-4xl">Your data stays on your PC, by default</h2>
+        <p class="mt-4 text-zinc-400">GameRoute was built by someone who was tired of "optimization" tools that quietly phone home. This one only ever does if you flip the switch yourself.</p>
       </div>
       <ul class="space-y-5">
         <li class="flex items-start gap-4">
@@ -778,8 +778,8 @@
         <li class="flex items-start gap-4">
           <span class="feature-icon shrink-0"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg></span>
           <div>
-            <h3 class="font-semibold text-white">No telemetry</h3>
-            <p class="mt-1 text-sm text-zinc-400">GameRoute doesn't send usage analytics, crash reports, or any other data about you or your PC anywhere.</p>
+            <h3 class="font-semibold text-white">Telemetry is opt-in, off by default</h3>
+            <p class="mt-1 text-sm text-zinc-400">Leave it off and nothing is ever sent. Turn it on in Settings and GameRoute sends a random install id and version number — so the developer can see a rough usage count — nothing personal, no crash reports, no usage patterns. No other version of the app phones home.</p>
           </div>
         </li>
         <li class="flex items-start gap-4">
@@ -792,8 +792,8 @@
         <li class="flex items-start gap-4">
           <span class="feature-icon shrink-0"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
           <div>
-            <h3 class="font-semibold text-white">No data collection</h3>
-            <p class="mt-1 text-sm text-zinc-400">The only network calls GameRoute makes are the diagnostics themselves (ping/traceroute/DNS to public endpoints) — the feature <em>is</em> the traffic, not a side channel.</p>
+            <h3 class="font-semibold text-white">No hidden data collection</h3>
+            <p class="mt-1 text-sm text-zinc-400">Every network call GameRoute makes by default is a diagnostic itself (ping/traceroute/DNS to public endpoints) — the feature <em>is</em> the traffic, not a side channel. The one opt-in exception (the usage ping above) is disclosed here and behind its own toggle, never bundled into anything else.</p>
           </div>
         </li>
       </ul>
