@@ -6,10 +6,6 @@
 // public download_count (no telemetry involved at all).
 const crypto = require('crypto');
 
-// Raw request bytes are required for signature verification, so Vercel's
-// automatic JSON body parsing has to be disabled for this function.
-module.exports.config = { api: { bodyParser: false } };
-
 const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
 
 function verifySignature(rawBody, signature, timestamp, publicKeyHex) {
@@ -108,3 +104,9 @@ module.exports = async (req, res) => {
 
   res.status(400).json({ error: 'unknown interaction' });
 };
+
+// Raw request bytes are required for signature verification, so Vercel's
+// automatic JSON body parsing has to be disabled for this function. This must
+// be attached AFTER module.exports is assigned above -- setting it earlier
+// gets discarded the moment module.exports is reassigned to the handler.
+module.exports.config = { api: { bodyParser: false } };
