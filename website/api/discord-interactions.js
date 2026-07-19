@@ -27,16 +27,22 @@ async function readRawBody(req) {
   return Buffer.concat(chunks);
 }
 
-/** Active installs in the last 30 days, or null if Upstash isn't configured. */
-async function getActiveInstallCount() {
+// Twice the app's heartbeat interval (see Constants.TELEMETRY_HEARTBEAT_INTERVAL_MINUTES),
+// as a buffer against scheduling drift/network delay -- an install missing two
+// heartbeats in a row is a reasonable line for "no longer running".
+const ONLINE_WINDOW_SECONDS = 10 * 60;
+
+/** Installs that heartbeated within the last ONLINE_WINDOW_SECONDS, or null if Upstash isn't configured. */
+async function getOnlineNowCount() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   if (!url || !token) {
     return null;
   }
   const headers = { Authorization: `Bearer ${token}` };
-  const cutoff = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60;
+  const cutoff = Math.floor(Date.now() / 1000) - ONLINE_WINDOW_SECONDS;
   try {
+    // Drop stale entries first so a closed app doesn't linger in the count forever.
     await fetch(`${url}/zremrangebyscore/active_installs/-inf/${cutoff}`, { method: 'POST', headers });
     const res = await fetch(`${url}/zcard/active_installs`, { method: 'POST', headers });
     const data = await res.json();
@@ -85,12 +91,12 @@ module.exports = async (req, res) => {
   }
 
   if (interaction.type === 2 && interaction.data && interaction.data.name === 'userstats') {
-    const [activeInstalls, downloads] = await Promise.all([getActiveInstallCount(), getDownloadCount()]);
+    const [onlineNow, downloads] = await Promise.all([getOnlineNowCount(), getDownloadCount()]);
     const lines = [
       '**GameRoute usage stats**',
-      activeInstalls === null
-        ? '- Active installs (last 30 days): unavailable'
-        : `- Active installs (last 30 days): **${activeInstalls}**`,
+      onlineNow === null
+        ? '- Online right now: unavailable'
+        : `- Online right now: **${onlineNow}**`,
       downloads === null
         ? '- Installer downloads (all-time): unavailable'
         : `- Installer downloads (all-time): **${downloads}**`,
