@@ -134,4 +134,16 @@ public final class Constants {
     );
     /** Same public, unauthenticated aggregate numbers as the Discord bot's {@code /userstats} command. */
     public static final String STATS_ENDPOINT = WEBSITE_URL + "/api/stats";
+
+    /**
+     * User-initiated only -- nothing is ever sent here without the user writing a description and
+     * pressing "Send Report" themselves (see Settings > Report a Problem). Tied to their Discord
+     * id if connected, otherwise their anonymous install id, so the Admin panel can group a
+     * person's reports together.
+     */
+    public static final String BUG_REPORT_SUBMIT_ENDPOINT = WEBSITE_URL + "/api/bug-report-submit";
+    /** Admin-only (role re-verified server-side, same pattern as discord-presence.js) list/detail/update. */
+    public static final String BUG_REPORTS_ENDPOINT = WEBSITE_URL + "/api/bug-reports";
+    /** How many characters of the tail of gameroute.log to attach to a report -- enough context, not the whole history. */
+    public static final int BUG_REPORT_LOG_TAIL_CHARS = 20_000;
 }

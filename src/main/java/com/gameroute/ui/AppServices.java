@@ -14,6 +14,7 @@ import com.gameroute.network.RouteAnalyzer;
 import com.gameroute.network.TracerouteService;
 import com.gameroute.optimizer.OptimizerService;
 import com.gameroute.service.AutoStartService;
+import com.gameroute.service.BugReportService;
 import com.gameroute.service.CsvExportService;
 import com.gameroute.service.DesktopShortcutScanner;
 import com.gameroute.service.DiscordAccountService;
@@ -58,6 +59,7 @@ public record AppServices(
         DiscordPresenceService discordPresenceService,
         DiscordAccountService discordAccountService,
         DiscordIdentitySharingService discordIdentitySharingService,
-        GameServerPingService gameServerPingService
+        GameServerPingService gameServerPingService,
+        BugReportService bugReportService
 ) {
 }

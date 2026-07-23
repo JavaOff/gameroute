@@ -17,6 +17,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -51,12 +52,13 @@ public class SettingsView extends ScrollPane {
         VBox notifications = buildNotificationsCard(services);
         VBox discordPresence = buildDiscordPresenceCard(services);
         VBox privacy = buildPrivacyCard(services);
+        VBox bugReport = buildBugReportCard(services);
 
-        root.getChildren().addAll(appearance, startup, optimization, updates, language, notifications, discordPresence, privacy);
+        root.getChildren().addAll(appearance, startup, optimization, updates, language, notifications, discordPresence, privacy, bugReport);
         setContent(root);
 
         Animations.staggeredEntrance(
-                List.of(appearance, startup, optimization, updates, language, notifications, discordPresence, privacy), 70);
+                List.of(appearance, startup, optimization, updates, language, notifications, discordPresence, privacy, bugReport), 70);
     }
 
     private HBox sectionTitle(String text, javafx.scene.Node icon) {
@@ -484,6 +486,59 @@ public class SettingsView extends ScrollPane {
         });
 
         VBox card = new VBox(12, title, telemetry, note, shareDiscord, shareDiscordNote);
+        card.getStyleClass().addAll("glass-card", "glass-card-hover");
+        return card;
+    }
+
+    /**
+     * User-initiated only -- nothing is ever sent unless someone writes a description here and
+     * presses Send themselves. Always includes the app version, OS and a recent log tail, since a
+     * report with no diagnostic context isn't actually actionable; tied to your Discord identity
+     * if connected, otherwise your anonymous install id, so it can show up in your own history if
+     * you ever connect Discord later.
+     */
+    private VBox buildBugReportCard(AppServices services) {
+        HBox title = sectionTitle("REPORT A PROBLEM", Icons.wrench(16, Color.web("#B9BEC7")));
+
+        TextArea description = new TextArea();
+        description.setPromptText("What went wrong? The more detail, the easier it is to fix.");
+        description.setWrapText(true);
+        description.setPrefRowCount(4);
+
+        Label note = new Label("Sends your description along with the app version, OS and a recent slice of the "
+                + "local log file -- nothing else, and only when you press Send.");
+        note.getStyleClass().add("card-subtitle");
+        note.setWrapText(true);
+
+        Button send = new Button("Send Report");
+        send.getStyleClass().add("btn-glow-red");
+        Label status = new Label();
+        status.getStyleClass().add("card-subtitle");
+
+        send.setOnAction(e -> {
+            String text = description.getText() == null ? "" : description.getText().trim();
+            if (text.isEmpty()) {
+                status.setText("Write a description first.");
+                return;
+            }
+            send.setDisable(true);
+            status.setText("Sending...");
+            services.bugReportService().submit(services.config(), services.discordAccountService(), text)
+                    .whenComplete((v, err) -> Platform.runLater(() -> {
+                        send.setDisable(false);
+                        if (err != null) {
+                            status.setText("Could not send -- check your connection and try again.");
+                        } else {
+                            status.setText("Sent, thank you.");
+                            description.clear();
+                        }
+                    }));
+        });
+
+        HBox actionRow = new HBox(12, send, status);
+        actionRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox card = new VBox(12, title, description, note, actionRow);
         card.getStyleClass().addAll("glass-card", "glass-card-hover");
         return card;
     }

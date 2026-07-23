@@ -17,6 +17,7 @@ import com.gameroute.optimizer.OptimizerService;
 import com.gameroute.service.AutoStartService;
 import com.gameroute.service.CsvExportService;
 import com.gameroute.service.DesktopShortcutScanner;
+import com.gameroute.service.BugReportService;
 import com.gameroute.service.DiscordAccountService;
 import com.gameroute.service.DiscordIdentitySharingService;
 import com.gameroute.service.DiscordPresenceService;
@@ -111,6 +112,7 @@ public class Main extends Application {
         discordPresenceService = new DiscordPresenceService();
         discordIdentitySharingService = new DiscordIdentitySharingService();
         DiscordAccountService discordAccountService = new DiscordAccountService();
+        BugReportService bugReportService = new BugReportService();
 
         AppServices services = new AppServices(
                 config, pingService, tracerouteService, dnsService, networkInterfaceService,
@@ -119,7 +121,7 @@ public class Main extends Application {
                 csvExportService, notificationService, notificationCenter,
                 processDiagnosticsMonitor, publicIpService, gameIconStore, desktopShortcutScanner,
                 updateService, telemetryService, discordPresenceService,
-                discordAccountService, discordIdentitySharingService, gameServerPingService);
+                discordAccountService, discordIdentitySharingService, gameServerPingService, bugReportService);
 
         if (config.isAutoCheckForUpdatesEnabled()) {
             checkForUpdateOnStartup(services);
