@@ -6,13 +6,13 @@
 
     <groupId>com.gameroute</groupId>
     <artifactId>gameroute</artifactId>
-    <version>1.0.0</version>
+    <version>1.4.7</version>
     <packaging>jar</packaging>
 
     <name>GameRoute</name>
     <description>
-        Network diagnostics and optimization companion for League of Legends:
-        ping monitoring, traceroute analysis and safe, user-confirmed Windows
+        Network diagnostics and optimization companion for League of Legends, Valorant, CS2 and
+        other supported games: ping monitoring, traceroute analysis and safe, user-confirmed Windows
         network tuning. Not affiliated with Riot Games.
     </description>
 
@@ -76,6 +76,22 @@
 
     <build>
         <finalName>gameroute</finalName>
+        <resources>
+            <!-- Everything under resources/ as-is (CSS, icons, i18n); filtering these
+                 would risk mangling binary files like the PNG icons. -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+            </resource>
+            <!-- A separate, filtered-only directory for version.properties, so the
+                 auto-updater's "what version am I" check reads the real
+                 ${project.version} instead of a hand-typed constant that can drift
+                 out of sync with a release. -->
+            <resource>
+                <directory>src/main/resources-filtered</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

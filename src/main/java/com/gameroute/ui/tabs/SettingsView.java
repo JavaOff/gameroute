@@ -1,22 +1,33 @@
 package com.gameroute.ui.tabs;
 
+import com.gameroute.config.Constants;
+import com.gameroute.service.UpdateService;
 import com.gameroute.ui.AppServices;
+import com.gameroute.ui.ThemeManager;
 import com.gameroute.ui.components.Animations;
 import com.gameroute.ui.components.Dialogs;
 import com.gameroute.ui.icons.Icons;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
+import java.awt.Desktop;
+import java.net.URI;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,13 +45,18 @@ public class SettingsView extends ScrollPane {
 
         VBox appearance = buildAppearanceCard(services, stage);
         VBox startup = buildStartupCard(services);
+        VBox optimization = buildOptimizationCard(services);
+        VBox updates = buildUpdatesCard(services, stage);
         VBox language = buildLanguageCard(services);
         VBox notifications = buildNotificationsCard(services);
+        VBox discordPresence = buildDiscordPresenceCard(services);
+        VBox privacy = buildPrivacyCard(services);
 
-        root.getChildren().addAll(appearance, startup, language, notifications);
+        root.getChildren().addAll(appearance, startup, optimization, updates, language, notifications, discordPresence, privacy);
         setContent(root);
 
-        Animations.staggeredEntrance(List.of(appearance, startup, language, notifications), 70);
+        Animations.staggeredEntrance(
+                List.of(appearance, startup, optimization, updates, language, notifications, discordPresence, privacy), 70);
     }
 
     private HBox sectionTitle(String text, javafx.scene.Node icon) {
@@ -52,30 +68,65 @@ public class SettingsView extends ScrollPane {
     }
 
     private VBox buildAppearanceCard(AppServices services, Stage stage) {
-        HBox title = sectionTitle("APPEARANCE", Icons.gear(16, Color.web("#9EA3AE")));
+        HBox title = sectionTitle("APPEARANCE", Icons.palette(16, Color.web("#B9BEC7")));
 
-        CheckBox darkMode = new CheckBox("Dark mode");
-        darkMode.setSelected(services.config().isDarkMode());
-        darkMode.setOnAction(e -> {
-            boolean enabled = darkMode.isSelected();
-            services.config().setDarkMode(enabled);
-            String stylesheet = getClass().getResource("/css/dark.css").toExternalForm();
-            if (enabled) {
-                if (!stage.getScene().getStylesheets().contains(stylesheet)) {
-                    stage.getScene().getStylesheets().add(stylesheet);
-                }
-            } else {
-                stage.getScene().getStylesheets().remove(stylesheet);
-            }
-        });
+        Label label = new Label("Theme");
+        label.getStyleClass().add("card-subtitle");
 
-        VBox card = new VBox(12, title, darkMode);
+        HBox swatches = new HBox(10);
+        swatches.setAlignment(Pos.CENTER_LEFT);
+        for (ThemeManager.Theme theme : ThemeManager.Theme.values()) {
+            swatches.getChildren().add(themeSwatch(services, theme, swatches));
+        }
+
+        Label note = new Label("Also switchable any time from the palette icon in the title bar.");
+        note.getStyleClass().add("card-subtitle");
+
+        VBox card = new VBox(12, title, label, swatches, note);
         card.getStyleClass().addAll("glass-card", "glass-card-hover");
         return card;
     }
 
+    /** A clickable theme preview tile: accent dot on the theme's card color, highlighted when active. */
+    private VBox themeSwatch(AppServices services, ThemeManager.Theme theme, HBox allSwatches) {
+        javafx.scene.shape.Circle accentDot = new javafx.scene.shape.Circle(9, theme.accent());
+        StackPane preview = new StackPane(accentDot);
+        preview.setPrefSize(64, 40);
+        preview.setMaxSize(64, 40);
+        preview.setStyle("-fx-background-color: " + (theme == ThemeManager.Theme.OLED_BLACK ? "#000000" : "#151922")
+                + "; -fx-background-radius: 10;");
+
+        Label name = new Label(theme.displayName());
+        name.setStyle("-fx-font-size: 10px; -fx-font-weight: 700;");
+        name.getStyleClass().add("card-subtitle");
+
+        VBox tile = new VBox(6, preview, name);
+        tile.setAlignment(Pos.CENTER);
+        tile.setPadding(new javafx.geometry.Insets(8));
+        tile.setCursor(javafx.scene.Cursor.HAND);
+        tile.setUserData(theme);
+        updateSwatchBorder(tile, ThemeManager.current() == theme);
+
+        tile.setOnMouseClicked(e -> {
+            ThemeManager.apply(theme);
+            services.config().setTheme(theme.name());
+            for (javafx.scene.Node node : allSwatches.getChildren()) {
+                if (node instanceof VBox other) {
+                    updateSwatchBorder(other, other.getUserData() == theme);
+                }
+            }
+        });
+        return tile;
+    }
+
+    private void updateSwatchBorder(VBox tile, boolean active) {
+        tile.setStyle("-fx-background-radius: 12; -fx-border-radius: 12; -fx-border-width: "
+                + (active ? "2" : "1") + "; -fx-border-color: "
+                + (active ? "-fx-red" : "-fx-border-subtle") + ";");
+    }
+
     private VBox buildStartupCard(AppServices services) {
-        HBox title = sectionTitle("STARTUP", Icons.zap(16, Color.web("#9EA3AE")));
+        HBox title = sectionTitle("STARTUP", Icons.zap(16, Color.web("#B9BEC7")));
 
         CheckBox autoStart = new CheckBox("Start GameRoute with Windows");
         autoStart.setSelected(services.config().isAutoStart());
@@ -114,8 +165,185 @@ public class SettingsView extends ScrollPane {
         return card;
     }
 
+    private VBox buildOptimizationCard(AppServices services) {
+        HBox title = sectionTitle("OPTIMIZATION", Icons.shieldCheck(16, Color.web("#B9BEC7")));
+
+        CheckBox autoOptimize = new CheckBox("Automatically optimize when a supported game starts");
+        autoOptimize.setSelected(services.config().isAutoOptimizeEnabled());
+
+        Label note = new Label("Applies that game's saved profile (priority, DNS, QoS) the moment GameRoute "
+                + "detects it running -- the same steps Quick Optimize runs, just without asking each time. "
+                + "Edit what each game's profile actually does on the Profiles tab.");
+        note.getStyleClass().add("card-subtitle");
+        note.setWrapText(true);
+
+        autoOptimize.setOnAction(e -> {
+            boolean enable = autoOptimize.isSelected();
+            if (!enable) {
+                services.config().setAutoOptimizeEnabled(false);
+                return;
+            }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setHeaderText("Enable automatic optimization");
+            confirm.setContentText("From now on, whenever GameRoute detects a supported game has just started, "
+                    + "it will immediately apply that game's saved profile (process priority, DNS resolver, QoS "
+                    + "tagging) without a confirmation dialog -- same as clicking Quick Optimize yourself, just "
+                    + "automatic. You'll still get a notification each time it runs. Turn this checkbox off here "
+                    + "at any time to go back to manual.");
+            Dialogs.themed(confirm);
+            Optional<ButtonType> choice = confirm.showAndWait();
+            if (choice.isEmpty() || choice.get() != ButtonType.OK) {
+                autoOptimize.setSelected(false);
+                return;
+            }
+            services.config().setAutoOptimizeEnabled(true);
+        });
+
+        VBox card = new VBox(12, title, autoOptimize, note);
+        card.getStyleClass().addAll("glass-card", "glass-card-hover");
+        return card;
+    }
+
+    private VBox buildUpdatesCard(AppServices services, Stage stage) {
+        HBox title = sectionTitle("UPDATES", Icons.refresh(16, Color.web("#B9BEC7")));
+
+        Label versionLabel = new Label("Current version: " + Constants.APP_VERSION);
+        versionLabel.getStyleClass().add("card-subtitle");
+
+        CheckBox autoCheck = new CheckBox("Automatically check for updates on startup");
+        autoCheck.setSelected(services.config().isAutoCheckForUpdatesEnabled());
+        autoCheck.setOnAction(e -> services.config().setAutoCheckForUpdatesEnabled(autoCheck.isSelected()));
+
+        Label status = new Label("Not checked yet this session.");
+        status.getStyleClass().add("card-subtitle");
+        status.setWrapText(true);
+
+        Button checkNow = new Button("Check Now");
+        checkNow.getStyleClass().add("button-ghost");
+
+        Region grow = new Region();
+        HBox.setHgrow(grow, Priority.ALWAYS);
+        HBox checkRow = new HBox(10, status, grow, checkNow);
+        checkRow.setAlignment(Pos.CENTER_LEFT);
+
+        VBox actionArea = new VBox(10);
+
+        checkNow.setOnAction(e -> {
+            checkNow.setDisable(true);
+            status.setText("Checking...");
+            actionArea.getChildren().clear();
+            services.updateService().checkForUpdate().thenAccept(maybeUpdate -> Platform.runLater(() -> {
+                checkNow.setDisable(false);
+                if (maybeUpdate.isEmpty()) {
+                    status.setText("You're up to date (v" + Constants.APP_VERSION + ").");
+                    return;
+                }
+                UpdateService.UpdateInfo update = maybeUpdate.get();
+                status.setText("Update available: v" + update.version());
+                actionArea.getChildren().add(buildUpdateAvailablePanel(services, stage, update));
+            }));
+        });
+
+        VBox card = new VBox(12, title, versionLabel, autoCheck, checkRow, actionArea);
+        card.getStyleClass().addAll("glass-card", "glass-card-hover");
+        return card;
+    }
+
+    /** The "here's what's new, do you want it" panel shown once a newer release is found. */
+    private VBox buildUpdateAvailablePanel(AppServices services, Stage stage, UpdateService.UpdateInfo update) {
+        Label notes = new Label(update.notes() == null || update.notes().isBlank()
+                ? "No release notes provided." : update.notes());
+        notes.getStyleClass().add("card-subtitle");
+        notes.setWrapText(true);
+        notes.setMaxHeight(120);
+
+        Button viewNotes = new Button("View on GitHub");
+        viewNotes.getStyleClass().add("button-ghost");
+        viewNotes.setDisable(update.releasePageUrl() == null);
+        viewNotes.setOnAction(e -> openInBrowser(update.releasePageUrl()));
+
+        Button skip = new Button("Skip This Version");
+        skip.getStyleClass().add("button-ghost");
+
+        Button install = new Button("Download && Install");
+        install.getStyleClass().add("btn-glow-red");
+
+        Region grow = new Region();
+        HBox.setHgrow(grow, Priority.ALWAYS);
+        HBox buttons = new HBox(10, viewNotes, grow, skip, install);
+        buttons.setAlignment(Pos.CENTER_LEFT);
+
+        VBox panel = new VBox(10, notes, buttons);
+        panel.setPadding(new Insets(12));
+        panel.setStyle("-fx-background-color: rgba(255,255,255,0.03); -fx-background-radius: 12;"
+                + "-fx-border-color: -fx-border-subtle; -fx-border-radius: 12; -fx-border-width: 1;");
+
+        skip.setOnAction(e -> {
+            services.config().setSkippedUpdateVersion(update.version());
+            panel.setVisible(false);
+            panel.setManaged(false);
+        });
+
+        install.setOnAction(e -> downloadAndInstall(services, stage, update, install));
+        return panel;
+    }
+
+    private void downloadAndInstall(AppServices services, Stage stage, UpdateService.UpdateInfo update, Button install) {
+        install.setDisable(true);
+        install.setText("Downloading...");
+        Path dest = Path.of(System.getProperty("java.io.tmpdir"), "GameRouteSetup-" + update.version() + ".exe");
+        services.updateService().downloadInstaller(update.downloadUrl(), dest).thenAccept(ok -> Platform.runLater(() -> {
+            if (!ok) {
+                install.setDisable(false);
+                install.setText("Download && Install");
+                Alert error = new Alert(Alert.AlertType.ERROR,
+                        "Could not download the installer. Check your connection and try again, or download it "
+                                + "manually from the GitHub release page.");
+                Dialogs.themed(error);
+                error.showAndWait();
+                return;
+            }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setHeaderText("Install GameRoute " + update.version() + "?");
+            confirm.setContentText("GameRoute will close now so the installer can replace it. Your settings, "
+                    + "statistics and profiles are stored separately and are not affected. The installer window "
+                    + "will guide you through the rest.");
+            Dialogs.themed(confirm);
+            Optional<ButtonType> choice = confirm.showAndWait();
+            if (choice.isEmpty() || choice.get() != ButtonType.OK) {
+                install.setDisable(false);
+                install.setText("Download && Install");
+                return;
+            }
+            try {
+                new ProcessBuilder(dest.toString()).start();
+            } catch (Exception ex) {
+                Alert error = new Alert(Alert.AlertType.ERROR,
+                        "Downloaded the installer but could not launch it. Open it manually from: " + dest);
+                Dialogs.themed(error);
+                error.showAndWait();
+                install.setDisable(false);
+                install.setText("Download && Install");
+                return;
+            }
+            stage.hide();
+            Platform.exit();
+        }));
+    }
+
+    private void openInBrowser(String url) {
+        if (url == null) {
+            return;
+        }
+        try {
+            Desktop.getDesktop().browse(URI.create(url));
+        } catch (Exception ignored) {
+            // no default browser association or headless env -- nothing sensible to fall back to here
+        }
+    }
+
     private VBox buildLanguageCard(AppServices services) {
-        HBox title = sectionTitle("LANGUAGE", Icons.globe(16, Color.web("#9EA3AE")));
+        HBox title = sectionTitle("LANGUAGE", Icons.globe(16, Color.web("#B9BEC7")));
 
         ComboBox<String> language = new ComboBox<>();
         language.getItems().addAll("en", "de");
@@ -132,7 +360,7 @@ public class SettingsView extends ScrollPane {
     }
 
     private VBox buildNotificationsCard(AppServices services) {
-        HBox title = sectionTitle("NOTIFICATIONS", Icons.bell(16, Color.web("#9EA3AE")));
+        HBox title = sectionTitle("NOTIFICATIONS", Icons.bell(16, Color.web("#B9BEC7")));
 
         CheckBox notifications = new CheckBox("Show system tray notifications (optimization results, packet loss alerts)");
         notifications.setSelected(services.config().isNotificationsEnabled());
@@ -143,6 +371,105 @@ public class SettingsView extends ScrollPane {
         });
 
         VBox card = new VBox(12, title, notifications);
+        card.getStyleClass().addAll("glass-card", "glass-card-hover");
+        return card;
+    }
+
+    private VBox buildDiscordPresenceCard(AppServices services) {
+        HBox title = sectionTitle("DISCORD RICH PRESENCE", Icons.activity(16, Color.web("#B9BEC7")));
+
+        CheckBox presence = new CheckBox("Show GameRoute as a Discord activity while it's running");
+        presence.setSelected(services.config().isDiscordPresenceEnabled());
+
+        Label note = new Label("Talks directly to your own local Discord client over the same private connection "
+                + "Spotify and VS Code use -- nothing is sent to GameRoute's servers. Shows \"GameRoute\" plus "
+                + "whichever supported game it currently detects (or \"Idle\" if none), with a \"Visit Website\" "
+                + "button others can click. This can't hide or replace any other app's own Discord activity -- "
+                + "Discord only lets each app control its own entry.");
+        note.getStyleClass().add("card-subtitle");
+        note.setWrapText(true);
+
+        presence.setOnAction(e -> {
+            boolean enable = presence.isSelected();
+            services.config().setDiscordPresenceEnabled(enable);
+            services.discordPresenceService().setEnabled(enable);
+        });
+
+        VBox card = new VBox(12, title, presence, note);
+        card.getStyleClass().addAll("glass-card", "glass-card-hover");
+        return card;
+    }
+
+    private VBox buildPrivacyCard(AppServices services) {
+        HBox title = sectionTitle("PRIVACY", Icons.shieldCheck(16, Color.web("#B9BEC7")));
+
+        CheckBox telemetry = new CheckBox("Send an anonymous usage ping (helps the developer see how many people use GameRoute)");
+        telemetry.setSelected(services.config().isTelemetryEnabled());
+
+        Label note = new Label("Off by default. When enabled, GameRoute sends a random install id (generated once on "
+                + "this PC, not derived from any hardware or personal identifier) and the app version -- nothing "
+                + "else -- roughly every " + Constants.TELEMETRY_HEARTBEAT_INTERVAL_MINUTES + " minutes while "
+                + "GameRoute is running, so the developer can see roughly how many people have it open right now. "
+                + "No IP logging on our side beyond what any web request naturally exposes, no crash reports, no usage patterns.");
+        note.getStyleClass().add("card-subtitle");
+        note.setWrapText(true);
+
+        telemetry.setOnAction(e -> {
+            boolean enable = telemetry.isSelected();
+            if (!enable) {
+                services.config().setTelemetryEnabled(false);
+                return;
+            }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setHeaderText("Enable anonymous usage ping?");
+            confirm.setContentText("GameRoute will periodically send a random install id and its version number "
+                    + "to help the developer see a rough count of how many people use it. No personal data, no "
+                    + "hardware identifiers, no usage patterns -- just that one id and a version string. Turn this "
+                    + "checkbox off at any time to stop.");
+            Dialogs.themed(confirm);
+            Optional<ButtonType> choice = confirm.showAndWait();
+            if (choice.isEmpty() || choice.get() != ButtonType.OK) {
+                telemetry.setSelected(false);
+                return;
+            }
+            services.config().setTelemetryEnabled(true);
+            services.telemetryService().sendHeartbeat(services.config());
+        });
+
+        CheckBox shareDiscord = new CheckBox("Share my connected Discord identity with server admins");
+        shareDiscord.setSelected(services.config().isShareDiscordWithAdminsEnabled());
+
+        Label shareDiscordNote = new Label("Off by default, and separate from the usage ping above. When enabled "
+                + "(and a Discord account is connected), GameRoute periodically shares your Discord id, username "
+                + "and avatar so the GameRoute server's Owner/Administrator/Moderator can see who currently has "
+                + "GameRoute connected, in an in-app Admin panel only they can open. Nothing else about you or "
+                + "your usage is shared this way.");
+        shareDiscordNote.getStyleClass().add("card-subtitle");
+        shareDiscordNote.setWrapText(true);
+
+        shareDiscord.setOnAction(e -> {
+            boolean enable = shareDiscord.isSelected();
+            if (!enable) {
+                services.config().setShareDiscordWithAdminsEnabled(false);
+                return;
+            }
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setHeaderText("Share your Discord identity with server admins?");
+            confirm.setContentText("Your Discord id, username and avatar will be periodically shared so the "
+                    + "GameRoute Discord server's Owner/Administrator/Moderator can see who currently has GameRoute "
+                    + "connected, in an in-app Admin panel. This requires a connected Discord account and only takes "
+                    + "effect while one is connected. Turn this checkbox off at any time to stop.");
+            Dialogs.themed(confirm);
+            Optional<ButtonType> choice = confirm.showAndWait();
+            if (choice.isEmpty() || choice.get() != ButtonType.OK) {
+                shareDiscord.setSelected(false);
+                return;
+            }
+            services.config().setShareDiscordWithAdminsEnabled(true);
+            services.discordIdentitySharingService().sendHeartbeat(services.config(), services.discordAccountService());
+        });
+
+        VBox card = new VBox(12, title, telemetry, note, shareDiscord, shareDiscordNote);
         card.getStyleClass().addAll("glass-card", "glass-card-hover");
         return card;
     }
