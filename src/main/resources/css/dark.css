@@ -8,23 +8,31 @@
  */
 
 .root {
-    -fx-bg-primary: #090B10;
-    -fx-bg-secondary: #10131A;
-    -fx-bg-card: #151922;
-    -fx-bg-card-hover: #1A1F2B;
+    -fx-bg-primary: #0F1013;
+    -fx-bg-secondary: #14161B;
+    -fx-bg-card: #171A21;
+    -fx-bg-card-hover: #1D2028;
     -fx-border-subtle: rgba(255, 255, 255, 0.05);
     -fx-border-strong: rgba(255, 255, 255, 0.10);
 
-    -fx-red: #FF3B30;
-    -fx-red-hover: #FF5A52;
-    -fx-red-dim: rgba(255, 59, 48, 0.16);
-    -fx-success: #30D158;
-    -fx-success-dim: rgba(48, 209, 88, 0.16);
-    -fx-warning: #FFD60A;
-    -fx-warning-dim: rgba(255, 214, 10, 0.16);
+    -fx-red: #FF3B3B;
+    -fx-red-hover: #FF5C5C;
+    -fx-red-dim: rgba(255, 59, 59, 0.16);
+    /* Accent glow shades used inside dropshadow effects; theme override
+       stylesheets redefine these together with -fx-red so every glow in the
+       app follows the active theme's accent automatically. */
+    -fx-accent-glow: rgba(255, 59, 59, 0.50);
+    -fx-accent-glow-hover: rgba(255, 92, 92, 0.72);
+    -fx-accent-glow-dot: rgba(255, 59, 59, 0.9);
+    -fx-success: #2ED573;
+    -fx-success-dim: rgba(46, 213, 115, 0.16);
+    -fx-warning: #F6B93B;
+    -fx-warning-dim: rgba(246, 185, 59, 0.16);
+    -fx-info: #4D9EFF;
+    -fx-info-dim: rgba(77, 158, 255, 0.16);
 
     -fx-text-primary: #F5F5F7;
-    -fx-text-secondary: #9EA3AE;
+    -fx-text-secondary: #B9BEC7;
 
     /* Back-compat aliases so any not-yet-migrated view still themes correctly. */
     -fx-base-bg: -fx-bg-primary;
@@ -118,12 +126,12 @@
 
 .notif-dot {
     -fx-fill: -fx-red;
-    -fx-effect: dropshadow(gaussian, rgba(255,59,48,0.9), 6, 0.5, 0, 0);
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow-dot, 6, 0.5, 0, 0);
 }
 
 /* ---- Sidebar ---- */
 .sidebar {
-    -fx-background-color: linear-gradient(to bottom, #0D0F15, #090B10);
+    -fx-background-color: linear-gradient(to bottom, #13151A, #0F1013);
     -fx-border-color: transparent -fx-border-subtle transparent transparent;
     -fx-border-width: 0 1 0 0;
 }
@@ -155,7 +163,7 @@
 
 .nav-indicator {
     -fx-fill: -fx-red;
-    -fx-effect: dropshadow(gaussian, rgba(255,59,48,0.85), 10, 0.55, 0, 0);
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow-dot, 10, 0.55, 0, 0);
 }
 
 .sidebar-version {
@@ -275,12 +283,12 @@
     -fx-font-weight: 800;
     -fx-border-width: 0;
     -fx-background-radius: 12;
-    -fx-effect: dropshadow(gaussian, rgba(255,59,48,0.55), 20, 0.35, 0, 4);
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow, 20, 0.35, 0, 4);
 }
 
 .button-primary:hover, .btn-glow-red:hover {
     -fx-background-color: linear-gradient(to bottom, -fx-red-hover, derive(-fx-red-hover, 8%));
-    -fx-effect: dropshadow(gaussian, rgba(255,90,82,0.75), 28, 0.4, 0, 4);
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow-hover, 28, 0.4, 0, 4);
 }
 
 .btn-optimize-sidebar {
@@ -292,11 +300,11 @@
     -fx-background-radius: 14;
     -fx-padding: 14 12 14 12;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(255,59,48,0.5), 22, 0.35, 0, 5);
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow, 22, 0.35, 0, 5);
 }
 
 .btn-optimize-sidebar:hover {
-    -fx-effect: dropshadow(gaussian, rgba(255,90,82,0.8), 30, 0.45, 0, 5);
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow-hover, 30, 0.45, 0, 5);
 }
 
 .button-danger {
@@ -336,7 +344,7 @@
 .toggle-button:selected {
     -fx-background-color: -fx-red;
     -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(255,59,48,0.5), 14, 0.4, 0, 2);
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow, 14, 0.4, 0, 2);
 }
 
 .segmented-group {
@@ -353,6 +361,16 @@
 .table-view {
     -fx-background-color: transparent;
     -fx-table-cell-border-color: transparent;
+}
+
+/*
+ * Without this, a TableColumn with no custom cell factory (plain text like
+ * "Code"/"Region"/"Hostname") falls back to JavaFX Modena's default
+ * .table-cell text color -- a dark gray meant for light table backgrounds,
+ * which reads as barely-visible gray-on-gray against this dark theme.
+ */
+.table-view .table-cell {
+    -fx-text-fill: -fx-text-primary;
 }
 
 .table-view .column-header-background {
@@ -419,9 +437,9 @@
     -fx-radius: 4;
 }
 
-.dot-good { -fx-fill: -fx-success; -fx-effect: dropshadow(gaussian, rgba(48,209,88,0.9), 8, 0.6, 0, 0); }
-.dot-warn { -fx-fill: -fx-warning; -fx-effect: dropshadow(gaussian, rgba(255,214,10,0.9), 8, 0.6, 0, 0); }
-.dot-bad  { -fx-fill: -fx-red;     -fx-effect: dropshadow(gaussian, rgba(255,59,48,0.9), 8, 0.6, 0, 0); }
+.dot-good { -fx-fill: -fx-success; -fx-effect: dropshadow(gaussian, rgba(46,213,115,0.9), 8, 0.6, 0, 0); }
+.dot-warn { -fx-fill: -fx-warning; -fx-effect: dropshadow(gaussian, rgba(246,185,59,0.9), 8, 0.6, 0, 0); }
+.dot-bad  { -fx-fill: -fx-red;     -fx-effect: dropshadow(gaussian, -fx-accent-glow-dot, 8, 0.6, 0, 0); }
 
 /* ============================= Progress bars ============================= */
 
@@ -452,6 +470,33 @@
     -fx-border-width: 1;
 }
 
+/*
+ * TextArea has its own style class (.text-area, not .text-field), so it falls back to Modena's
+ * light-theme white background unless styled separately -- LogsView used to work around this
+ * with a per-instance inline style; this makes every TextArea in the app dark by default instead.
+ */
+.text-area {
+    -fx-text-fill: -fx-text-primary;
+    -fx-background-color: transparent;
+    -fx-background-radius: 10;
+    -fx-border-color: -fx-border-subtle;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.text-area .content {
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-background-radius: 10;
+}
+
+.text-area .viewport {
+    -fx-background-color: transparent;
+}
+
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
 .combo-box .list-cell {
     -fx-text-fill: -fx-text-primary;
     -fx-background-color: transparent;
@@ -462,6 +507,16 @@
     -fx-border-color: -fx-border-strong;
     -fx-border-width: 1;
     -fx-background-radius: 10;
+}
+
+/*
+ * Without an explicit text-fill, CheckBox/RadioButton labels fall back to
+ * JavaFX Modena's light-theme default (a dark gray meant for light
+ * backgrounds) -- the same class of bug the table cells had, just for a
+ * different control.
+ */
+.check-box, .radio-button {
+    -fx-text-fill: -fx-text-primary;
 }
 
 .check-box .box {
@@ -617,4 +672,218 @@
     -fx-background-color: linear-gradient(to top, -fx-red, -fx-red-hover);
     -fx-background-insets: 0;
     -fx-effect: dropshadow(gaussian, rgba(255,59,48,0.35), 8, 0.3, 0, 0);
+}
+
+/* ============================= Redesign: sections & hero ============================= */
+
+.section-header {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.section-header-line {
+    -fx-background-color: -fx-border-subtle;
+    -fx-pref-height: 1;
+}
+
+.hero-card {
+    -fx-background-color: linear-gradient(to bottom right, derive(-fx-bg-card, 10%), -fx-bg-card);
+    -fx-background-radius: 20;
+    -fx-border-color: -fx-border-subtle;
+    -fx-border-radius: 20;
+    -fx-border-width: 1;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 28, 0, 0, 10);
+}
+
+.hero-art {
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-border-color: rgba(255,255,255,0.10);
+}
+
+.hero-art-code {
+    -fx-font-size: 30px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 8, 0.4, 0, 2);
+}
+
+.hero-game-name {
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.hero-meta-label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.hero-meta-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+/* ============================= Redesign: latency score ============================= */
+
+.score-value {
+    -fx-font-size: 40px;
+    -fx-font-weight: 900;
+}
+
+.score-grade {
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+/* ============================= Redesign: info rows & chips ============================= */
+
+.info-row-label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 12px;
+}
+
+.info-row-value {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.chip {
+    -fx-background-color: rgba(255,255,255,0.05);
+    -fx-background-radius: 8;
+    -fx-border-color: -fx-border-subtle;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-padding: 3 10 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+/* ============================= Redesign: diagnostics ============================= */
+
+.diag-group-title {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.diag-row {
+    -fx-background-color: rgba(255,255,255,0.02);
+    -fx-background-radius: 12;
+    -fx-border-color: -fx-border-subtle;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 10 14 10 14;
+}
+
+.diag-row:hover {
+    -fx-background-color: rgba(255,255,255,0.045);
+}
+
+/*
+ * Deliberately NOT a blanket -fx-opacity dim: that washes out even the bold
+ * app-name label to a low-contrast gray-on-gray smear against this row's
+ * already-faint background. Only the background dims a touch; DiagRow.java
+ * recolors the name label itself to a still-readable secondary tone.
+ */
+.diag-row-off {
+    -fx-background-color: rgba(255,255,255,0.008);
+}
+
+.warn-banner {
+    -fx-background-color: -fx-warning-dim;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255,214,10,0.35);
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 10 14 10 14;
+}
+
+/* ============================= Redesign: toasts ============================= */
+
+.toast {
+    -fx-background-color: linear-gradient(to bottom right, derive(-fx-bg-card, 14%), derive(-fx-bg-card, 4%));
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-border-color: -fx-border-strong;
+    -fx-padding: 12 16 12 14;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 22, 0.2, 0, 6);
+}
+
+.toast-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+
+.toast-body {
+    -fx-font-size: 11px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+.toast-accent-info    { -fx-border-color: rgba(77,158,255,0.45); }
+.toast-accent-success { -fx-border-color: rgba(46,213,115,0.45); }
+.toast-accent-warning { -fx-border-color: rgba(246,185,59,0.45); }
+
+/* ============================= Redesign: sidebar rail & badges ============================= */
+
+.sidebar-badge {
+    -fx-background-color: -fx-red;
+    -fx-background-radius: 20;
+    -fx-padding: 1 5 1 5;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-accent-glow-dot, 6, 0.4, 0, 0);
+}
+
+/* ============================= Redesign: title bar avatar ============================= */
+
+.avatar-circle {
+    -fx-background-color: linear-gradient(to bottom right, derive(-fx-red, 15%), -fx-red);
+    -fx-background-radius: 100;
+}
+
+.avatar-initials {
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-text-fill: white;
+}
+
+/* ============================= Redesign: notification popup list ============================= */
+
+.notif-item {
+    -fx-background-color: rgba(255,255,255,0.03);
+    -fx-background-radius: 10;
+    -fx-border-color: -fx-border-subtle;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 8 12 8 12;
+}
+
+.notif-time {
+    -fx-font-size: 10px;
+    -fx-text-fill: -fx-text-secondary;
+}
+
+/* ============================= Redesign: top bar search + chips ============================= */
+
+.titlebar-search {
+    -fx-background-color: rgba(255,255,255,0.04);
+    -fx-background-radius: 10;
+    -fx-border-color: -fx-border-subtle;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 6 12 6 12;
+}
+
+.titlebar-search-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 12px;
+    -fx-prompt-text-fill: -fx-text-secondary;
+    -fx-padding: 0;
 }
