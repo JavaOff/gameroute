@@ -191,13 +191,9 @@ public class Main extends Application {
         if (!config.hasShownTelemetryPrompt()) {
             maybeShowTelemetryPrompt(services, stage);
         }
-        // Temporarily disabled: the Discord application is currently under a Discord-side
-        // quarantine (unrelated to this feature's code) which would make every login attempt
-        // fail right now. Re-enable this call once the quarantine appeal is resolved -- the
-        // "Connect Discord" button in the profile popup still works for anyone who wants to try.
-        // if (!config.hasShownDiscordAccountPrompt()) {
-        //     maybeShowDiscordAccountPrompt(services, stage, mainView);
-        // }
+        if (!config.hasShownDiscordAccountPrompt()) {
+            maybeShowDiscordAccountPrompt(services, stage, mainView);
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(this::shutdownServices));
     }
