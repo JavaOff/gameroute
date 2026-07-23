@@ -439,13 +439,27 @@ public class SettingsView extends ScrollPane {
         CheckBox shareDiscord = new CheckBox("Share my connected Discord identity with server admins");
         shareDiscord.setSelected(services.config().isShareDiscordWithAdminsEnabled());
 
-        Label shareDiscordNote = new Label("Off by default, and separate from the usage ping above. When enabled "
-                + "(and a Discord account is connected), GameRoute periodically shares your Discord id, username "
-                + "and avatar so the GameRoute server's Owner/Administrator/Moderator can see who currently has "
-                + "GameRoute connected, in an in-app Admin panel only they can open. Nothing else about you or "
-                + "your usage is shared this way.");
+        boolean isServerStaff = services.discordAccountService().currentUser(services.config())
+                .map(com.gameroute.service.DiscordAccountService.DiscordUser::isAdmin)
+                .orElse(false);
+
+        Label shareDiscordNote = new Label();
         shareDiscordNote.getStyleClass().add("card-subtitle");
         shareDiscordNote.setWrapText(true);
+        if (isServerStaff) {
+            shareDiscord.setSelected(true);
+            shareDiscord.setDisable(true);
+            shareDiscordNote.setText("Locked on because your connected Discord account holds a server staff role "
+                    + "(Owner/Administrator/Moderator) -- staff visibility to each other in the Admin panel is a "
+                    + "policy for that role, not an individual choice. Disconnect Discord (or lose that role) to "
+                    + "stop sharing. Regular members keep full control over this toggle.");
+        } else {
+            shareDiscordNote.setText("Off by default, and separate from the usage ping above. When enabled "
+                    + "(and a Discord account is connected), GameRoute periodically shares your Discord id, username "
+                    + "and avatar so the GameRoute server's Owner/Administrator/Moderator can see who currently has "
+                    + "GameRoute connected, in an in-app Admin panel only they can open. Nothing else about you or "
+                    + "your usage is shared this way.");
+        }
 
         shareDiscord.setOnAction(e -> {
             boolean enable = shareDiscord.isSelected();

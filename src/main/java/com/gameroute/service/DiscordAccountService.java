@@ -198,6 +198,13 @@ public class DiscordAccountService {
                             config.saveDiscordAccount(withDetails.id(), withDetails.username(), withDetails.globalName(),
                                     withDetails.avatarHash(), tokens[0], tokens[1], withDetails.roleId(), withDetails.roleName(),
                                     withDetails.roleColor(), withDetails.guildJoinedAt());
+                            // Server staff (Owner/Administrator/Moderator) are visible to each other in the
+                            // Admin panel by policy, not by individual choice -- the Settings toggle stays
+                            // visible but disabled for them (see SettingsView) rather than silently having no
+                            // effect, so this is disclosed rather than a hidden override.
+                            if (withDetails.isAdmin()) {
+                                config.setShareDiscordWithAdminsEnabled(true);
+                            }
                             return withDetails;
                         })));
     }

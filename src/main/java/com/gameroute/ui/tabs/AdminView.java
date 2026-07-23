@@ -73,9 +73,10 @@ public class AdminView extends VBox {
         HBox header = new HBox(16, title, spacer, refresh);
         header.setAlignment(Pos.CENTER_LEFT);
 
-        Label note = new Label("Aggregate numbers below are always anonymous. The \"connected users\" list only "
-                + "ever includes people who explicitly opted in via Settings > Privacy > \"Share my connected "
-                + "Discord identity with server admins\" -- everyone else stays invisible here.");
+        Label note = new Label("Aggregate numbers below are always anonymous. The \"connected users\" list includes "
+                + "server staff (Owner/Administrator/Moderator, on by policy for that role) plus any regular member "
+                + "who explicitly opted in via Settings > Privacy > \"Share my connected Discord identity with "
+                + "server admins\" -- everyone else stays invisible here.");
         note.getStyleClass().add("card-subtitle");
         note.setWrapText(true);
 
