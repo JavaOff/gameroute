@@ -438,54 +438,19 @@ public class SettingsView extends ScrollPane {
             services.telemetryService().sendHeartbeat(services.config());
         });
 
-        CheckBox shareDiscord = new CheckBox("Share my connected Discord identity with server admins");
-        shareDiscord.setSelected(services.config().isShareDiscordWithAdminsEnabled());
+        Label discordShareTitle = new Label("Discord identity sharing");
+        discordShareTitle.setStyle("-fx-font-weight: 700; -fx-font-size: 12px;");
+        Label discordShareNote = new Label("Not a separate setting -- it's an inherent part of connecting a Discord "
+                + "account. If one is connected, GameRoute shares your Discord id, username and avatar with the "
+                + "GameRoute server so its Owner/Administrator/Moderator can see who currently has GameRoute "
+                + "connected, in an in-app Admin panel only they can open. If you don't want that, don't connect "
+                + "Discord, or disconnect it anytime from the profile popup in the title bar -- sharing stops the "
+                + "moment you do.");
+        discordShareNote.getStyleClass().add("card-subtitle");
+        discordShareNote.setWrapText(true);
+        VBox discordShareBox = new VBox(4, discordShareTitle, discordShareNote);
 
-        boolean isServerStaff = services.discordAccountService().currentUser(services.config())
-                .map(com.gameroute.service.DiscordAccountService.DiscordUser::isAdmin)
-                .orElse(false);
-
-        Label shareDiscordNote = new Label();
-        shareDiscordNote.getStyleClass().add("card-subtitle");
-        shareDiscordNote.setWrapText(true);
-        if (isServerStaff) {
-            shareDiscord.setSelected(true);
-            shareDiscord.setDisable(true);
-            shareDiscordNote.setText("Locked on because your connected Discord account holds a server staff role "
-                    + "(Owner/Administrator/Moderator) -- staff visibility to each other in the Admin panel is a "
-                    + "policy for that role, not an individual choice. Disconnect Discord (or lose that role) to "
-                    + "stop sharing. Regular members keep full control over this toggle.");
-        } else {
-            shareDiscordNote.setText("Off by default, and separate from the usage ping above. When enabled "
-                    + "(and a Discord account is connected), GameRoute periodically shares your Discord id, username "
-                    + "and avatar so the GameRoute server's Owner/Administrator/Moderator can see who currently has "
-                    + "GameRoute connected, in an in-app Admin panel only they can open. Nothing else about you or "
-                    + "your usage is shared this way.");
-        }
-
-        shareDiscord.setOnAction(e -> {
-            boolean enable = shareDiscord.isSelected();
-            if (!enable) {
-                services.config().setShareDiscordWithAdminsEnabled(false);
-                return;
-            }
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setHeaderText("Share your Discord identity with server admins?");
-            confirm.setContentText("Your Discord id, username and avatar will be periodically shared so the "
-                    + "GameRoute Discord server's Owner/Administrator/Moderator can see who currently has GameRoute "
-                    + "connected, in an in-app Admin panel. This requires a connected Discord account and only takes "
-                    + "effect while one is connected. Turn this checkbox off at any time to stop.");
-            Dialogs.themed(confirm);
-            Optional<ButtonType> choice = confirm.showAndWait();
-            if (choice.isEmpty() || choice.get() != ButtonType.OK) {
-                shareDiscord.setSelected(false);
-                return;
-            }
-            services.config().setShareDiscordWithAdminsEnabled(true);
-            services.discordIdentitySharingService().sendHeartbeat(services.config(), services.discordAccountService());
-        });
-
-        VBox card = new VBox(12, title, telemetry, note, shareDiscord, shareDiscordNote);
+        VBox card = new VBox(12, title, telemetry, note, discordShareBox);
         card.getStyleClass().addAll("glass-card", "glass-card-hover");
         return card;
     }

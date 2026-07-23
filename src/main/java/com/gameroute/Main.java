@@ -239,8 +239,10 @@ public class Main extends Application {
         prompt.setHeaderText("Connect your Discord account?");
         prompt.setContentText("GameRoute can show your real Discord name and avatar instead of a generic local "
                 + "profile. This opens Discord's own login page in your browser -- GameRoute never sees your "
-                + "password, and only ever reads your username and avatar (the \"identify\" scope), nothing more. "
-                + "You can connect or disconnect anytime from the profile popup in the title bar.");
+                + "password. Connecting also shares your Discord id, username and avatar with the GameRoute server, "
+                + "so its Owner/Administrator/Moderator can see who currently has GameRoute connected -- that's an "
+                + "inherent part of connecting, not a separate setting. You can connect or disconnect anytime from "
+                + "the profile popup in the title bar; disconnecting stops the sharing immediately.");
         Dialogs.themed(prompt);
         Optional<ButtonType> choice = prompt.showAndWait();
         config.setDiscordAccountPromptShown(true);

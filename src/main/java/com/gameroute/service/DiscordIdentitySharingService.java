@@ -15,11 +15,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Separate, explicit opt-in from {@link TelemetryService} (which never carries identity): while
- * enabled AND a Discord account is connected, sends a "still connected" heartbeat with that
- * account's id/username/avatar, so the in-app Admin panel (Owner/Administrator/Moderator only)
- * can show who currently has GameRoute connected to Discord. Off by default; only ever sends
- * anything once the user has explicitly turned it on in Settings.
+ * Sharing your Discord id/username/avatar with the GameRoute server (so the in-app Admin panel,
+ * Owner/Administrator/Moderator only, can see who currently has GameRoute connected) is an
+ * inherent, disclosed part of connecting a Discord account -- not a separate toggle. This sends a
+ * "still connected" heartbeat exactly as long as a Discord account is connected, and stops
+ * immediately the moment it's disconnected (see {@link DiscordAccountService#disconnect}); if you
+ * don't want this, don't connect Discord (or disconnect it) -- there's no in-between state.
  */
 public class DiscordIdentitySharingService {
 
@@ -35,7 +36,7 @@ public class DiscordIdentitySharingService {
         return thread;
     });
 
-    /** Sends one heartbeat immediately (if enabled and connected) and starts the repeating loop. Call once at startup. */
+    /** Sends one heartbeat immediately (if connected) and starts the repeating loop. Call once at startup. */
     public void start(AppConfig config, DiscordAccountService discordAccountService) {
         sendHeartbeat(config, discordAccountService);
         scheduler.scheduleAtFixedRate(() -> sendHeartbeat(config, discordAccountService),
@@ -48,11 +49,8 @@ public class DiscordIdentitySharingService {
         scheduler.shutdownNow();
     }
 
-    /** No-op unless both enabled and a Discord account is connected; also called directly right after either changes. */
+    /** No-op unless a Discord account is connected; also called directly right after one connects. */
     public void sendHeartbeat(AppConfig config, DiscordAccountService discordAccountService) {
-        if (!config.isShareDiscordWithAdminsEnabled()) {
-            return;
-        }
         var userOpt = discordAccountService.currentUser(config);
         if (userOpt.isEmpty()) {
             return;

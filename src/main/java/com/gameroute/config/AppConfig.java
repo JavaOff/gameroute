@@ -44,14 +44,6 @@ public class AppConfig {
     private static final String KEY_DISCORD_ROLE_NAME = "discordAccount.roleName";
     private static final String KEY_DISCORD_ROLE_COLOR = "discordAccount.roleColor";
     private static final String KEY_DISCORD_GUILD_JOINED_AT = "discordAccount.guildJoinedAt";
-    /**
-     * Separate opt-in from telemetry (which never carries identity) -- this one specifically
-     * shares your connected Discord identity (id/username/avatar) with GameRoute's backend so
-     * Owner/Administrator/Moderator can see who currently has GameRoute connected to Discord,
-     * in the in-app Admin panel. Off by default; asked for explicitly, never bundled into the
-     * generic telemetry toggle.
-     */
-    private static final String KEY_SHARE_DISCORD_WITH_ADMINS = "app.shareDiscordWithAdmins";
 
     private final Properties properties = new Properties();
 
@@ -89,7 +81,6 @@ public class AppConfig {
         properties.putIfAbsent(KEY_SKIPPED_UPDATE_VERSION, "");
         properties.putIfAbsent(KEY_TELEMETRY_ENABLED, "false");
         properties.putIfAbsent(KEY_TELEMETRY_PROMPT_SHOWN, "false");
-        properties.putIfAbsent(KEY_SHARE_DISCORD_WITH_ADMINS, "false");
         // On by default (unlike telemetry): a Discord Rich Presence entry is immediately
         // visible on the user's own profile the moment it appears, so there's no hidden
         // data collection to consent to -- just an easy off-switch in Settings.
@@ -237,15 +228,6 @@ public class AppConfig {
         return properties.getProperty(KEY_INSTALL_ID);
     }
 
-    /** Off by default. When enabled, shares your connected Discord identity with server admins (see field javadoc above). */
-    public boolean isShareDiscordWithAdminsEnabled() {
-        return Boolean.parseBoolean(properties.getProperty(KEY_SHARE_DISCORD_WITH_ADMINS));
-    }
-
-    public void setShareDiscordWithAdminsEnabled(boolean value) {
-        properties.setProperty(KEY_SHARE_DISCORD_WITH_ADMINS, String.valueOf(value));
-        save();
-    }
 
     /** On by default; talks only to the user's own local Discord client, never a server. */
     public boolean isDiscordPresenceEnabled() {

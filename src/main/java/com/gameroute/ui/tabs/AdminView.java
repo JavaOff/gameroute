@@ -48,10 +48,11 @@ import java.util.regex.Pattern;
  * Only reachable by Owner/Administrator/Moderator in the GameRoute Discord server (gated in
  * {@link com.gameroute.ui.MainView}, which omits this page's nav entry entirely for anyone
  * else). Shows aggregate usage numbers (same as the Discord bot's {@code /userstats}) plus a
- * "who's connected" list -- built only from users who explicitly opted into the separate
- * "Share my Discord identity with server admins" toggle in Settings (off by default). The
- * backend independently re-verifies the caller's own role via Discord's API before returning
- * that list, so this stays admin-only even though the app's source is public.
+ * "who's connected" list -- built from everyone who currently has a Discord account connected,
+ * since sharing that identity with the server is disclosed as an inherent part of connecting one
+ * (not a separate toggle; disconnecting removes you from this list immediately). The backend
+ * independently re-verifies the caller's own role via Discord's API before returning that list,
+ * so this stays admin-only even though the app's source is public.
  */
 public class AdminView extends VBox {
 
@@ -111,9 +112,9 @@ public class AdminView extends VBox {
         header.setAlignment(Pos.CENTER_LEFT);
 
         Label note = new Label("Aggregate numbers below are always anonymous. The \"connected users\" list includes "
-                + "server staff (Owner/Administrator/Moderator, on by policy for that role) plus any regular member "
-                + "who explicitly opted in via Settings > Privacy > \"Share my connected Discord identity with "
-                + "server admins\" -- everyone else stays invisible here.");
+                + "everyone who currently has a Discord account connected to GameRoute -- sharing that identity with "
+                + "the server is disclosed as part of connecting, not a separate setting, and disconnecting removes "
+                + "someone from this list immediately.");
         note.getStyleClass().add("card-subtitle");
         note.setWrapText(true);
 
