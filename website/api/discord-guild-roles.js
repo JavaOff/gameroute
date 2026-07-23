@@ -3,6 +3,8 @@
 // user's own OAuth token can only list which role IDs they hold, via guilds.members.read --
 // GET /guilds/{id}/roles needs the bot to be a member of that guild), so this has to be a
 // small server-side proxy: the bot token never ships inside the distributed desktop app.
+'use strict';
+
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
     res.status(405).end();

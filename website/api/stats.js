@@ -2,6 +2,8 @@
 // /userstats command shows. Backs the desktop app's in-app Admin panel (visible only to
 // Owner/Administrator/Moderator, enforced client-side since there's nothing sensitive here:
 // no per-user data, just install counts anyone could also get by asking the Discord bot).
+'use strict';
+
 const { getOnlineNowCount, getDownloadCount } = require('../lib/discordStats');
 
 module.exports = async (req, res) => {
