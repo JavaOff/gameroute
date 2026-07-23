@@ -406,11 +406,14 @@ public class AdminView extends VBox {
         loading.getStyleClass().add("card-subtitle");
         content.getChildren().add(loading);
 
+        content.setStyle("-fx-background-color: #0F1013;");
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
         scroll.setPrefSize(580, 660);
+        scroll.setStyle("-fx-background-color: #0F1013;");
 
         Scene scene = new Scene(scroll);
+        scene.setFill(javafx.scene.paint.Color.web("#0F1013"));
         scene.getStylesheets().setAll(ThemeManager.stylesheets());
         dialog.setScene(scene);
         dialog.show();
